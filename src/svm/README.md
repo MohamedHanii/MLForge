@@ -57,7 +57,7 @@ Internal solver settings, which aren't constructor arguments: learning rate `0.0
 
 | Method / attribute | Description |
 |---|---|
-| `fit(X, y)` → `self` | Any labels with at least 2 classes. |
+| `fit(X, y)` → `self` | Numeric labels with at least 2 classes (string labels currently raise `TypeError`, see below). |
 | `decision_function(X)` | Binary: signed scores `(n,)`. Multi-class: `(n, n_classes)` one-vs-rest scores. |
 | `predict(X)` | Original class labels. |
 | `score(X, y)` | Accuracy. |
@@ -134,5 +134,6 @@ print("SVR R²:", round(svr.score(Xr, yr), 3))
   - Tune `C` and `gamma` with a balanced-accuracy criterion.
 
   The [breast-cancer notebook](../../notebooks/README.md) works through all three.
+- **Known bug: string labels.** `fit` checks `y` with `np.isnan`, which raises `TypeError` for string labels such as `'yes'` / `'no'`. Encode labels as integers first, for example with `np.unique(y, return_inverse=True)`.
 - The kernel path stores the full `n × n` training kernel matrix, so memory grows quadratically with the number of samples.
 - `SVC` exists for API familiarity. `SVM` is the same classifier.

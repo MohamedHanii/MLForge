@@ -44,6 +44,7 @@ Training details:
 
 - **Automatic standardisation.** `X` and `y` are z-scored inside `fit`, and `predict` undoes the scaling. Pass raw data.
 - **Objective.** Full-batch gradient descent on `0.5·SSE/n + 0.5·α·‖W‖²`.
+  > **Known bug:** the backpropagated error is `out − y` rather than `(out − y)/n`, so each update is **n×** the gradient of that objective. In practice the learning rate has to shrink as the dataset grows, and `alpha` is effectively divided by n. A good starting point is `lr ≈ 1 / n_train`. [`08_mlp.ipynb`](../../notebooks/library_tests/08_mlp.ipynb) demonstrates the problem.
 - **Gradient clipping.** The global norm is capped at `clip_grad_norm = 10.0`. Set the attribute to `None` to disable it.
 - **Early stopping.** Training stops when the loss fails to improve by more than `tol = 1e-4` for `n_iter_no_change = 10` epochs. Set `n_iter_no_change = None` to always run every epoch.
 

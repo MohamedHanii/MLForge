@@ -43,7 +43,9 @@ Gradients are clipped to ±1e6. **Standardise `X` before fitting.** Learned stat
 
 ### `StandardScaler(with_mean=True, with_std=True)`
 
-Z-score scaler with `fit`, `transform` and `fit_transform`. It stores `mean_` and `std_`, and constant features get `std = 1`.
+Z-score scaler with `fit`, `transform` and `fit_transform`. It stores `mean_` and `std_` and computes `(x − μ) / (σ + 1e-7)`. The `1e-7` keeps constant features from causing a division by zero.
+
+> **Known bug:** with `with_mean=False` or `with_std=False`, `fit` leaves the skipped statistic as `None` and `transform` then raises "not fitted". Use the default arguments for now.
 
 ### Validation helpers
 

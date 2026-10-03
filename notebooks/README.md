@@ -1,5 +1,7 @@
 # Notebooks: Final Assignment Set B
 
+> **Looking for the library tests?** [`library_tests/`](library_tests/README.md) has one test notebook per package (390 checks against scikit-learn, gradient checks, and real datasets), plus `run_all.py` to run them all.
+
 End-to-end experiments that use the MLForge models on two UCI datasets. The original assignment notebook (`final-assignment/SetB.ipynb`) was split into one notebook per track:
 
 | Notebook | Track | Dataset | Baseline | Required model |

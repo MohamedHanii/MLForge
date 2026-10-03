@@ -59,6 +59,8 @@ These work with any number of classes. Rows of the confusion matrix are true lab
 | `evaluate_classification_model(y_true, y_pred, labels=None, target_names=None)` | **Prints** a formatted confusion matrix and the metrics, and **returns** a dict with keys `accuracy`, `precision`, `recall`, `f1`, `confusion_matrix`. |
 
 > `average='weighted'` calls `np.bincount(y_true)`, so it assumes integer labels `0…k-1`.
+>
+> **Known bug:** `evaluate_classification_model` always uses `average='binary'`. On multi-class data, that silently reports **class 0's** precision, recall and F1. For multi-class problems, call `precision` / `recall` / `f1_score` with `average='macro'` instead.
 
 ---
 

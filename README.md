@@ -16,6 +16,7 @@ MLForge is the model library from the **Machine Learning Lab (Summer Semester 20
 - [Preprocessing: who scales what](#preprocessing-who-scales-what)
 - [Utilities (metrics, scalers, splitters)](#utilities-metrics-scalers-splitters)
 - [Notebooks](#notebooks)
+- [Testing](#testing)
 - [Known limitations](#known-limitations)
 - [Project notes](#project-notes)
 
@@ -65,7 +66,8 @@ MLForge/
 │       └── _decision_tree.py     DecisionTree (information gain)
 └── notebooks/                    ← end-to-end experiments on UCI datasets
     ├── breast_cancer_classification.ipynb
-    └── concrete_strength_regression.ipynb
+    ├── concrete_strength_regression.ipynb
+    └── library_tests/            ← one test notebook per package + run_all.py
 ```
 
 Each package folder has its own `README.md` with the full API, a worked example and implementation notes. See [notebooks/README.md](notebooks/README.md) for the experiments.
@@ -180,7 +182,7 @@ Each assignment library shipped its own helpers, so some helpers exist in severa
 
 | Helper | Location(s) | Notes |
 |---|---|---|
-| `StandardScaler` | `regression/_linear.py` (`with_mean`, `with_std` options), `regression/_logistic.py`, `svm/_svm.py` | All compute z-scores and treat constant features safely. |
+| `StandardScaler` | `regression/_linear.py` (`with_mean`, `with_std` options; divides by `σ + 1e-7`), `regression/_logistic.py`, `svm/_svm.py` | All compute z-scores and treat constant features safely. |
 | `train_test_split` | `regression/_logistic.py` | Stratified by default (`stratify='auto'`). Returns `X_train, X_test, y_train, y_test`. |
 | `resample` | `regression/_logistic.py` | Balances binary classes by under-sampling (`'down'`) or over-sampling (`'up'`). |
 | `KFold`, `StratifiedKFold`, `GridSearchCV` | `svm/_svm_utils.py` | `GridSearchCV` works with any estimator that has `get_params` / `set_params` / `score`. |
@@ -205,13 +207,31 @@ The [`notebooks/`](notebooks/README.md) folder holds the final assignment (Set B
 
 ---
 
+## Testing
+
+[`notebooks/library_tests/`](notebooks/library_tests/README.md) holds one notebook per package. Together they make 390 checks covering:
+
+- known answers on generated data
+- exact agreement with scikit-learn where the maths is identical
+- numerical gradient checks for every neural-network layer
+- performance on real datasets, both bundled and downloaded from UCI or OpenML
+
+```bash
+python notebooks/library_tests/run_all.py          # ≈ 2 min; exits non-zero if any check fails
+```
+
+The suite also records **6 known library bugs** (🐞). They are listed in the [test README](notebooks/library_tests/README.md#known-library-bugs-found-by-these-notebooks) and summarised below.
+
+---
+
 ## Known limitations
 
 - **Not an installable package.** There's no `pyproject.toml`, `requirements.txt` or `__init__.py`. Import from the repository root (see [Importing](#importing)).
-- **No test suite** yet.
 - **Logistic regression is binary-only.** Labels must be `0`/`1`. Multi-class labels don't raise an error, but the predictions are meaningless. Use `SVC`, `RandomForest`, `DecisionTree` or Naive Bayes for more than two classes.
 - **Logistic hyperparameters are fixed in code:** L2 `λ = 0.1`, `class_weight='balanced'` and `tol = 1e-5` are set in `_BaseLogistic.__init__` and aren't constructor arguments.
 - **The kernel SVM has no bias term.** The RBF/poly decision function is `Σ αᵢ yᵢ K(xᵢ, x)` with no intercept. On imbalanced data it can collapse to the majority class, so rebalance the training data or tune the decision threshold. The [breast-cancer notebook](notebooks/README.md) shows both.
+- **`MLPRegressor`'s gradient is n× too large.** It backpropagates `out − y` instead of `(out − y)/n`, so the effective learning rate grows with the dataset size. Use `lr ≈ 1/n_train` until this is fixed.
+- **`SVC` rejects string labels** (`TypeError`). Encode labels as integers.
 - **The CNN is pure NumPy** and runs on the CPU. Keep inputs small (e.g. 8×8 or 28×28 digits).
 - **Some helpers are duplicated across packages** (see [Utilities](#utilities-metrics-scalers-splitters)).
 
